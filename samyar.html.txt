@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>چالش بزرگ هشتم</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  font-family:tahoma;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  direction:rtl;
+  text-align:center;
+  color:white;
+}
+.box{
+  background:white;
+  color:black;
+  width:94%;
+  max-width:560px;
+  margin:20px auto;
+  padding:20px;
+  border-radius:18px;
+}
+button{
+  padding:12px 18px;
+  margin:6px;
+  font-size:15px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+}
+.hide{display:none}
+.progress{width:100%;background:#ddd;border-radius:10px;overflow:hidden}
+.bar{height:10px;background:#03a9f4;width:0%}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+td,th{
+  border:1px solid #ccc;
+  padding:6px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🏆 چالش بزرگ کلاس هشتم</h1>
+<h3>👑 سازنده: سامیار</h3>
+
+<div class="box" id="startBox">
+<input id="player" placeholder="نام بازیکن">
+<br><br>
+<button onclick="startGame()">🚀 شروع بازی</button>
+<h3>🏆 جدول رقابت</h3>
+<table id="board"></table>
+</div>
+
+<div class="box hide" id="gameBox">
+<p>👤 <span id="playerName"></span></p>
+<p>⭐ امتیاز: <span id="score">0</span></p>
+<p>⏱ زمان: <span id="time">12</span> ثانیه</p>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<h2 id="qText"></h2>
+<div id="answers"></div>
+</div>
+
+<div class="box hide" id="endBox">
+<h2>🏁 پایان بازی</h2>
+<p>امتیاز نهایی: <span id="finalScore"></span></p>
+<button onclick="saveScore()">💾 ثبت در جدول</button>
+<button onclick="location.reload()">🔄 دوباره</button>
+</div>
+
+<script>
+let score=0,time=12,timer;
+let used=[],currentQ,count=0;
+let leaderboard=JSON.parse(localStorage.getItem("board"))||[];
+
+const questions=[
+/* هوش */
+{q:"الگو: 3 , 6 , 12 , ؟",a:["18","24","30"],c:1},
+{q:"کدام متفاوت است؟",a:["دایره","مربع","مثلث"],c:0},
+
+/* ریاضی */
+{q:"حاصل 4² + 2؟",a:["18","20","22"],c:0},
+{q:"اگر x=5 → 3x-4؟",a:["11","15","19"],c:0},
+
+/* فیزیک */
+{q:"واحد نیرو چیست؟",a:["ژول","نیوتن","وات"],c:1},
+{q:"سرعت نور تقریباً؟",a:["300km/s","300,000km/s","150,000km/s"],c:1},
+
+/* جغرافیا */
+{q:"طولانی‌ترین رود جهان؟",a:["آمازون","نیل","کارون"],c:1},
+{q:"ایران در کدام قاره است؟",a:["آسیا","اروپا","آفریقا"],c:0},
+
+/* زبان انگلیسی */
+{q:"معنی (Beautiful)؟",a:["زیبا","بزرگ","سریع"],c:0},
+{q:"Past of go?",a:["goed","went","gone"],c:1}
+];
+
+function startGame(){
+let name=player.value;
+if(!name) return alert("نام را وارد کن");
+playerName.innerText=name;
+startBox.classList.add("hide");
+gameBox.classList.remove("hide");
+nextQ();
+timer=setInterval(tick,1000);
+}
+
+function tick(){
+time--;
+timeSpan=time;
+document.getElementById("time").innerText=time;
+if(time<=0) nextQ();
+}
+
+function nextQ(){
+if(used.length===questions.length) return endGame();
+count++;
+bar.style.width=(count/questions.length*100)+"%";
+time=12;
+let r;
+do{r=Math.floor(Math.random()*questions.length);}while(used.includes(r));
+used.push(r);
+currentQ=questions[r];
+qText.innerText=currentQ.q;
+answers.innerHTML="";
+currentQ.a.forEach((x,i)=>{
+answers.innerHTML+=`<button onclick="check(${i})">${x}</button>`;
+});
+}
+
+function check(i){
+if(i===currentQ.c) score+=time;
+document.getElementById("score").innerText=score;
+nextQ();
+}
+
+function endGame(){
+clearInterval(timer);
+gameBox.classList.add("hide");
+endBox.classList.remove("hide");
+finalScore.innerText=score;
+}
+
+function saveScore(){
+leaderboard.push({name:player.value,score});
+leaderboard.sort((a,b)=>b.score-a.score);
+leaderboard=leaderboard.slice(0,5);
+localStorage.setItem("board",JSON.stringify(leaderboard));
+showBoard();
+alert("ثبت شد ✔️");
+}
+
+function showBoard(){
+let html="<tr><th>نام</th><th>امتیاز</th></tr>";
+leaderboard.forEach(x=>{
+html+=`<tr><td>${x.name}</td><td>${x.score}</td></tr>`;
+});
+board.innerHTML=html;
+}
+showBoard();
+</script>
+
+</body>
+</html>
